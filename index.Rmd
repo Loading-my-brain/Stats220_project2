@@ -1,0 +1,130 @@
+---
+title: "Project2"
+date: "2023-03-22"
+subtitle: STATS 220 Semester One 2023
+fontsize: 11pt
+output:
+  bookdown::html_document2:
+    fig_height: 5
+    toc: yes
+    toc_float: true
+    code_folding: show
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+survey_data <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9m4BL1K5dTma_F125aHve4ykX05pkrLNHdhvzYdKH82PX8mM3TzpoXVN5wKf4X96Q4DyaevDCIV-d/pub?gid=2051647735&single=true&output=csv")
+learning_data <- survey_data  %>% 
+  rename (have_goals = 2,
+          completed_g = 3, 
+          sleep_d = 4,
+          study_method = 5,
+          organize = 6,
+          assignment = 7,
+          a_rate = 8) %>%
+  mutate(study_method = str_remove_all(study_method, ("Other|None"))) 
+
+```
+
+## Introduction
+
+#### Aspects of learning habits I decided to focus on for my report.
+
+-   As mentioned in my Google survey form: The purpose of this investigation was to assess the academic performances from certain self-regulated learning strategies in students enrolled in the University of Auckland 2023. This specifically focuses on the student's plannings and sleeping habits, where I hoped to examine how strong these self-regulated learning strategies relates to the student's overall academic performance.The form was sent only to students enrolled into the University of Auckland, and the responses attained are appropriate to apply the results to the students enrolled in the University of Auckland.
+
+-   Zimmerman & Martinez-Pons (1986-1988), are educational psychologist who identified 14 commonly used academic self-regulated learning strategies: self-evaluation, organizing and transforming, goal-setting and planning, seeking information, keeping records and monitoring, environmental structuring, self-consequences, rehearsing and memorizing, seeking peer assistance, seeking teacher assistance, seeking adult assistance, reviewing tests, reviewing notes, reviewing text.
+
+#### Let's Discuss tne of the guidelines for designing forms and how you considered this when designing your form.
+
+-   One of the guidelines in Part A for designing forms highlights: "Think carefully about what aspect(s) of learning preferences/habits that you **specifically want to focus on.**" To follow this guideline, I had to make sure that I wouldn't get side tracked from my initial purpose of examining the student's academic performances from their self-regulated learning strategies - a flow chart was used to prevent this issue.
+
+#### Why categorical data that was generated using your question with check boxes (fixed options) means the Google sheet data collected using your form is not strictly "tidy" data
+
+-   It defined that Tidy data: " is a standard way of mapping the meaning of a data set to its structure. The data set is messy or tidy depending on how rows, columns and tables are matched up with observations, variables and types. In tidy data: Every column is a variable. Every row is an observation.". More than 2 responses(data) was stored in a single cell, it doesn't satisfy the condition of "one variable per column". In my Google survey, every column had a variable/entity, however we had multiple responses for the question: "Do you follow particular study methods?", multiple responses were stored in a single cell in Google sheets, which was 'untidy'. Hence, the categorical data that was generated using the check boxes (fixed options) means the Google sheet data collected using my form is not strictly "tidy" data.
+
+-   Here's the [link](https://forms.gle/xcD8okKUyBkU5QCq9) to my form.
+
+## Analytics
+
+```{r}
+survey_data <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9m4BL1K5dTma_F125aHve4ykX05pkrLNHdhvzYdKH82PX8mM3TzpoXVN5wKf4X96Q4DyaevDCIV-d/pub?gid=2051647735&single=true&output=csv")
+learning_data <- survey_data  %>% 
+  rename (have_goals = 2,
+          completed_g = 3, 
+          sleep_d = 4,
+          study_method = 5,
+          organize = 6,
+          assignment = 7,
+          a_rate = 8) %>%
+  mutate(study_method = str_remove_all(study_method, ("Other|None"))) 
+
+learning_data %>% 
+  slice (1 : 10)%>%
+  knitr::kable()
+```
+
+#### Summarising of my top 2 key features of the data based on applying functions to my data frame or variables (extracted as vectors).
+
+-   My survey got `r nrow(learning_data)` responses. From this survey, I found that the average academic rate for students enrolled in the University of Auckland is approximately `r round(mean(learning_data$a_rate,na.rm = TRUE),2)` scores, which is low as expected; I assume that students didn't want to feel boastful when they were asked to rate themselves based on academic performances, or they simply had a low self-esteem.
+
+-   Another key finding is that the minimum hours of sleep attained by a student each day was `r  round(min(learning_data$sleep_d, na.rm = TRUE))` hours and the average hours of sleep attained by a student each day was `r learning_data$sleep_d %>% mean(na.rm = TRUE) %>% round()` hours, which is an hour less than the recommended sleep hours for adults. This agrees with a different research called ["Psychosocial Correlates of Insomnia Among College Students"](https://www.cdc.gov/pcd/issues/2022/22_0060.htm#:~:text=However%2C%20at%20least%2060%25%20of%20college%20students%20have%20poor%20quality%20sleep%20and%20garner%2C%20on%20average%2C%207%20hours%20of%20sleep%20per%20night%20(2).%20Previous%20research%20showed%20that%20up%20to%2075%25%20of%20college%20students%20reported%20occasional%20sleep%20disturbances%2C%20while%2015%25%20reported%20overall%20poor%20sleep%20quality%20(3)) as the average number of sleep hours obtained in my data set had the same average sleep value in their report: "However, at least 60% of college students have poor quality sleep and garner, **on average, 7 hours of sleep per night**"
+
+-   Note to the markers: It hasn't been specified in the guidelines, but I have explained for the vales of "two key features" identified (mean, min values) by giving reasoning for these values. Although I've used inline R coding for these values , the explanations may not match up in context. Hence, it may not satisfy the guideline: " The key aspect to focus on for this part of the project is that aspects of the report need to change when the data changes.". Overall, appropriate values will show even if I get a different sample, but an appropriate explanation may not show.
+
+#### Producing at least two different bar charts using {ggplot} functions
+
+```{r fig.width = 12, fig.height= 4}
+
+learning_data %>% 
+  ggplot() + 
+  geom_bar(aes(x = a_rate,
+               fill= have_goals)) + 
+             labs(title= "Student's academic rating and their goals", 
+                  x = "academic rating", 
+                  y = "Number of students", 
+                  caption = "This survey was conducted with students enrolled at the University of Auckland in 2023.")
+           
+```
+
+```{r}
+learning_data %>% 
+  ggplot(mapping = aes(x = sleep_d,
+             y = a_rate, 
+             colour = organize)) + 
+  geom_point(alpha = 0.5) + 
+  scale_colour_manual(values=c("blue", "red")) + 
+  labs(title= "Student's academic rating and duration of sleep(hr) based on self-organisation", 
+       x = "Sleep duration(hr) per day", 
+       y = "Academic rating", 
+       colour = "self-organised",
+       caption = "This survey was conducted with students enrolled at the University of Auckland in 2023.
+       The darker dots in blue and red represent the overlap of the responses")
+
+```
+
+## Learning reflection
+
+####  ONE important idea I learned from Module 2 Creating dynamic reporting systems.
+
+-   Out of the many important ideas from Module 2 Creating dynamic reporting systems, I learnt the difference and the importance of the use of na.rm argument and drop_na() function. I had no NA values in my data set, however, I know now what to do when I do meet this issue: to use na.rm argument for most cases so that I only remove the NA values within the row, and not the entire row as the responses for the other variables are still valid. The drop_na function will result in removing the entire row reducing the sample size - we don't want this becuase we don't want biased results!
+
+#### Creativity.
+
+-   I have used regex for a particular question in my survey to assure that they can only input an integer from 0 to 20. This was used for when they needed to input the number of tasks.This is because it doesn't make sense to have 4.6 goals, hence, I have altered how they can respond to ensure that I receive appropriate number for my data.
+
+-   I have also used the subtitles in the Google survey forms so that the respondents have a clearer understanding with the questions; respondents were given examples.
+
+-   I've also used *scale_colour_manual()* function in collaboration with *alpha*, an argument in ggplot2 where It controls the transparency of a layer in my scatter plot in "Student's academic rating and duration of sleep(hr) based on self-organisation". This is so that my viewers enjoy a nice visual presentation.
+
+-   Finally, I have 'altered' my data so that I was able to remove "other" and "None" within the variable of `study_method`. How? By using the str_remove_all() function. In my first attempt in creating the survey, I have added the option of "Other" and "None" as the respondent's response to the question: "Do you follow a particular study method?". However, I later discovered that the survey guidelines did not allow the options of 'Other' and 'None' as responses to this question. I couldn't alter data in the Google survey form, nor did I thought it was appropriate to alter the data in Excel. Hence, I decided to keep the original data to 'edit' it in R Studio to remove the unwanted 'values' and to also display that I have altered the data.
+
+#### Things related to data technologies that I'm more curious about exploring further.
+
+-   There were many things I have learnt from this course. As a former STATS 150 students, I knew a lot of the concepts of how to critically evaluate of statistically based reports as well as constructing statistically sound arguments and reports. However, applying those learning into action was more difficult than I thought; creating questions that 'makes sense' to the respondents, coming up with different **types of questions** , creating the plots based on those responses using R coding was such a big learning experience. However, there's more to focus on and to learn. During in making this survey, certain questions were raised: how would I manage a greater sample size? How would I create interactive charts, graphs, and other visual representations of data when I create complex data sets? Hence, my next step for further exploration in data technologies is to resolve these issues by learning sweet coding tricks as well as learning more of the standard language(SQL) for manipulating data.
+
+```{css}
+body { background-color: #FCE4EC; }
+
+```
